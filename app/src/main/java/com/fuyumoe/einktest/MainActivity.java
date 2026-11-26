@@ -30,12 +30,22 @@ public class MainActivity extends Activity {
 
         super.onCreate(b);
 
-        LinearLayout root = new LinearLayout(this);
-        root.setOrientation(LinearLayout.VERTICAL);
-        root.setPadding(8, 8, 8, 8);
+        LinearLayout root =
+            new LinearLayout(this);
+
+        root.setOrientation(
+            LinearLayout.VERTICAL
+        );
+
+        root.setPadding(
+            8,
+            8,
+            8,
+            8
+        );
 
         // =====================================================
-        // E-Ink 测试画布
+        // 测试画布
         // =====================================================
 
         v = new TestView(this);
@@ -50,60 +60,94 @@ public class MainActivity extends Activity {
         );
 
         // =====================================================
-        // 按钮区域
+        // 按钮
         // =====================================================
 
-        GridLayout buttons = new GridLayout(this);
+        GridLayout buttons =
+            new GridLayout(this);
 
         buttons.setColumnCount(2);
-        buttons.setRowCount(5);
+        buttons.setRowCount(6);
 
         addButton(
             buttons,
-            "API 探测",
-            x -> probe()
+            "深度扫描 E-Ink API",
+            x -> deepScan()
+        );
+
+        addButton(
+            buttons,
+            "读取当前模式",
+            x -> readModes()
         );
 
         addButton(
             buttons,
             "A2 100",
-            x -> refresh(A2, "A2")
+            x -> refresh(
+                A2,
+                "A2"
+            )
         );
 
         addButton(
             buttons,
             "Regal 15",
-            x -> refresh(REGAL, "Regal")
+            x -> refresh(
+                REGAL,
+                "Regal"
+            )
         );
 
         addButton(
             buttons,
             "Part 3",
-            x -> refresh(PART, "Part")
+            x -> refresh(
+                PART,
+                "Part"
+            )
         );
 
         addButton(
             buttons,
             "Full 1",
-            x -> refresh(FULL, "Full")
+            x -> refresh(
+                FULL,
+                "Full"
+            )
         );
 
         addButton(
             buttons,
             "Fast 18",
-            x -> refresh(FAST, "Fast")
+            x -> refresh(
+                FAST,
+                "Fast"
+            )
+        );
+
+        addButton(
+            buttons,
+            "setBy A2",
+            x -> refreshBy(
+                A2,
+                "setBy A2"
+            )
+        );
+
+        addButton(
+            buttons,
+            "setBy Regal",
+            x -> refreshBy(
+                REGAL,
+                "setBy Regal"
+            )
         );
 
         addButton(
             buttons,
             "局部刷新测试",
             x -> local()
-        );
-
-        addButton(
-            buttons,
-            "A2 → Regal",
-            x -> a2regal()
         );
 
         addButton(
@@ -127,13 +171,17 @@ public class MainActivity extends Activity {
         );
 
         // =====================================================
-        // 日志区域
+        // 日志
         // =====================================================
 
-        log = new TextView(this);
+        log =
+            new TextView(this);
 
-        log.setTextSize(16);
-        log.setTextIsSelectable(true);
+        log.setTextSize(15);
+
+        log.setTextIsSelectable(
+            true
+        );
 
         log.setPadding(
             8,
@@ -142,7 +190,8 @@ public class MainActivity extends Activity {
             8
         );
 
-        ScrollView scroll = new ScrollView(this);
+        ScrollView scroll =
+            new ScrollView(this);
 
         scroll.addView(
             log,
@@ -156,7 +205,7 @@ public class MainActivity extends Activity {
             scroll,
             new LinearLayout.LayoutParams(
                 -1,
-                260
+                300
             )
         );
 
@@ -167,31 +216,48 @@ public class MainActivity extends Activity {
         // =====================================================
 
         println(
-            "设备=" +
+            "================================"
+        );
+
+        println(
+            "K103 E-Ink Deep Scanner"
+        );
+
+        println(
+            "================================"
+        );
+
+        println(
+            "设备 = " +
             Build.MANUFACTURER +
             " " +
-            Build.MODEL +
-            " platform=" +
-            prop("ro.board.platform") +
-            " SDK=" +
+            Build.MODEL
+        );
+
+        println(
+            "平台 = " +
+            prop(
+                "ro.board.platform"
+            )
+        );
+
+        println(
+            "SDK = " +
             Build.VERSION.SDK_INT
         );
 
         println(
-            "=== K103 E-Ink Test ==="
+            "系统 = " +
+            Build.VERSION.RELEASE
         );
 
         println(
-            "按钮：API探测 / A2 / Regal / Part / Full / Fast"
-        );
-
-        println(
-            "支持：局部刷新 / A2→Regal / 导出日志"
+            "准备完成，请点击“深度扫描 E-Ink API”"
         );
     }
 
     // =========================================================
-    // 创建按钮
+    // 按钮
     // =========================================================
 
     void addButton(
@@ -200,21 +266,21 @@ public class MainActivity extends Activity {
         View.OnClickListener listener
     ) {
 
-        Button b = new Button(this);
+        Button b =
+            new Button(this);
 
         b.setText(text);
-
-        b.setTextSize(18);
-
+        b.setTextSize(17);
         b.setAllCaps(false);
 
-        b.setOnClickListener(listener);
+        b.setOnClickListener(
+            listener
+        );
 
         GridLayout.LayoutParams lp =
             new GridLayout.LayoutParams();
 
         lp.width = 0;
-
         lp.height = 68;
 
         lp.columnSpec =
@@ -237,7 +303,7 @@ public class MainActivity extends Activity {
     }
 
     // =========================================================
-    // 输出日志
+    // 日志
     // =========================================================
 
     void println(String s) {
@@ -247,7 +313,6 @@ public class MainActivity extends Activity {
         }
 
         log.append(s);
-
         log.append("\n");
 
         log.post(
@@ -259,7 +324,8 @@ public class MainActivity extends Activity {
                 ) {
 
                     ScrollView sv =
-                        (ScrollView) log.getParent();
+                        (ScrollView)
+                        log.getParent();
 
                     sv.post(
                         () ->
@@ -272,212 +338,896 @@ public class MainActivity extends Activity {
         );
     }
 
-    // =========================================================
-    // 清空日志
-    // =========================================================
-
     void clearLog() {
 
         if (log != null) {
             log.setText("");
         }
 
-        println("日志已清空");
+        println(
+            "日志已清空"
+        );
     }
 
     // =========================================================
-    // 导出日志
+    // 深度扫描
     // =========================================================
 
-    void exportLog() {
+    void deepScan() {
+
+        println("");
+        println(
+            "========================================"
+        );
+        println(
+            "开始深度扫描 E-Ink API"
+        );
+        println(
+            "========================================"
+        );
+
+        println(
+            "注意：本次扫描只读取方法/字段信息，"
+            +
+            "不会自动调用未知刷新接口。"
+        );
+
+        println("");
+
+        scanBasicInfo();
+
+        scanMethods();
+
+        scanFields();
+
+        scanInnerClasses();
+
+        scanEinkCandidates();
+
+        scanKnownGetters();
+
+        println("");
+
+        println(
+            "========================================"
+        );
+
+        println(
+            "深度扫描完成"
+        );
+
+        println(
+            "请点击“导出日志”把完整结果保存。"
+        );
+
+        println(
+            "========================================"
+        );
+
+        Toast.makeText(
+            this,
+            "深度扫描完成",
+            Toast.LENGTH_LONG
+        ).show();
+    }
+
+    // =========================================================
+    // 基本信息
+    // =========================================================
+
+    void scanBasicInfo() {
+
+        println("");
+        println(
+            "----- 基本 API 信息 -----"
+        );
 
         try {
 
-            String text =
-                log.getText().toString();
-
-            if (text.length() == 0) {
-
-                Toast.makeText(
-                    this,
-                    "当前没有日志",
-                    Toast.LENGTH_SHORT
-                ).show();
-
-                return;
-            }
-
-            Intent intent =
-                new Intent(
-                    Intent.ACTION_CREATE_DOCUMENT
+            Method m =
+                View.class.getMethod(
+                    "setEinkUpdateMode",
+                    int.class
                 );
 
-            intent.addCategory(
-                Intent.CATEGORY_OPENABLE
-            );
-
-            intent.setType(
-                "text/plain"
-            );
-
-            String filename =
-                "K103_EInkTest_log_" +
-                new java.text.SimpleDateFormat(
-                    "yyyyMMdd_HHmmss",
-                    Locale.US
-                ).format(
-                    new java.util.Date()
-                ) +
-                ".txt";
-
-            intent.putExtra(
-                Intent.EXTRA_TITLE,
-                filename
-            );
-
             println(
-                "正在打开系统保存窗口..."
-            );
-
-            startActivityForResult(
-                intent,
-                REQUEST_EXPORT_LOG
+                "setEinkUpdateMode = " +
+                m.toGenericString()
             );
 
         } catch (Throwable e) {
 
             println(
-                "打开保存窗口失败：" +
+                "setEinkUpdateMode = NOT FOUND"
+            );
+        }
+
+        try {
+
+            Method m =
+                View.class.getMethod(
+                    "setByEinkUpdateMode",
+                    int.class
+                );
+
+            println(
+                "setByEinkUpdateMode = " +
+                m.toGenericString()
+            );
+
+        } catch (Throwable e) {
+
+            println(
+                "setByEinkUpdateMode = NOT FOUND"
+            );
+        }
+
+        try {
+
+            Method m =
+                View.class.getMethod(
+                    "getEinkUpdateMode"
+                );
+
+            println(
+                "getEinkUpdateMode = " +
+                m.toGenericString()
+            );
+
+        } catch (Throwable e) {
+
+            println(
+                "getEinkUpdateMode = NOT FOUND"
+            );
+        }
+
+        try {
+
+            Method m =
+                View.class.getMethod(
+                    "getByEinkUpdateMode"
+                );
+
+            println(
+                "getByEinkUpdateMode = " +
+                m.toGenericString()
+            );
+
+        } catch (Throwable e) {
+
+            println(
+                "getByEinkUpdateMode = NOT FOUND"
+            );
+        }
+    }
+
+    // =========================================================
+    // 扫描方法
+    // =========================================================
+
+    void scanMethods() {
+
+        println("");
+        println(
+            "----- View.class 所有声明方法 -----"
+        );
+
+        Method[] methods;
+
+        try {
+
+            methods =
+                View.class.getDeclaredMethods();
+
+        } catch (Throwable e) {
+
+            println(
+                "getDeclaredMethods FAIL: " +
                 err(e)
             );
 
-            Toast.makeText(
-                this,
-                "导出失败：" +
-                e.getMessage(),
-                Toast.LENGTH_LONG
-            ).show();
+            return;
         }
-    }
 
-    // =========================================================
-    // 系统文件保存结果
-    // =========================================================
-
-    @Override
-    protected void onActivityResult(
-        int requestCode,
-        int resultCode,
-        Intent data
-    ) {
-
-        super.onActivityResult(
-            requestCode,
-            resultCode,
-            data
+        println(
+            "DeclaredMethods 数量 = " +
+            methods.length
         );
 
-        if (
-            requestCode ==
-                REQUEST_EXPORT_LOG &&
-            resultCode ==
-                RESULT_OK &&
-            data != null
-        ) {
+        for (Method m : methods) {
 
-            Uri uri =
-                data.getData();
+            String name =
+                m.getName();
 
-            if (uri == null) {
-
-                println(
-                    "导出取消：没有选择文件"
+            String lower =
+                name.toLowerCase(
+                    Locale.US
                 );
 
-                return;
+            if (
+                isInteresting(
+                    lower
+                )
+            ) {
+
+                println(
+                    "[METHOD] " +
+                    m.toGenericString()
+                );
             }
+        }
 
-            try {
+        println("");
+        println(
+            "----- View.class 所有公开方法中的 E-Ink 候选 -----"
+        );
 
-                java.io.OutputStream out =
-                    getContentResolver()
-                        .openOutputStream(uri);
+        try {
 
-                if (out == null) {
+            Method[] publicMethods =
+                View.class.getMethods();
 
-                    throw new Exception(
-                        "无法打开文件"
+            for (
+                Method m :
+                publicMethods
+            ) {
+
+                String lower =
+                    m.getName()
+                        .toLowerCase(
+                            Locale.US
+                        );
+
+                if (
+                    isInteresting(
+                        lower
+                    )
+                ) {
+
+                    println(
+                        "[PUBLIC] " +
+                        m.toGenericString()
                     );
                 }
-
-                String text =
-                    log.getText().toString();
-
-                out.write(
-                    text.getBytes(
-                        "UTF-8"
-                    )
-                );
-
-                out.flush();
-
-                out.close();
-
-                println("");
-                println(
-                    "=============================="
-                );
-
-                println(
-                    "日志导出成功"
-                );
-
-                println(
-                    "保存位置：" +
-                    uri.toString()
-                );
-
-                println(
-                    "=============================="
-                );
-
-                Toast.makeText(
-                    this,
-                    "日志保存成功",
-                    Toast.LENGTH_LONG
-                ).show();
-
-            } catch (Throwable e) {
-
-                println(
-                    "写入日志失败：" +
-                    err(e)
-                );
-
-                Toast.makeText(
-                    this,
-                    "保存失败：" +
-                    e.getMessage(),
-                    Toast.LENGTH_LONG
-                ).show();
             }
 
-        } else if (
-            requestCode ==
-                REQUEST_EXPORT_LOG
-        ) {
+        } catch (Throwable e) {
 
             println(
-                "日志导出已取消"
+                "getMethods FAIL: " +
+                err(e)
             );
         }
     }
 
     // =========================================================
-    // 获取系统属性
+    // 扫描字段
     // =========================================================
 
-    String prop(String n) {
+    void scanFields() {
+
+        println("");
+        println(
+            "----- View.class E-Ink 相关字段 -----"
+        );
+
+        Field[] fields;
+
+        try {
+
+            fields =
+                View.class.getDeclaredFields();
+
+        } catch (Throwable e) {
+
+            println(
+                "getDeclaredFields FAIL: " +
+                err(e)
+            );
+
+            return;
+        }
+
+        println(
+            "DeclaredFields 数量 = " +
+            fields.length
+        );
+
+        for (Field f : fields) {
+
+            String name =
+                f.getName();
+
+            String lower =
+                name.toLowerCase(
+                    Locale.US
+                );
+
+            if (
+                isInteresting(
+                    lower
+                )
+            ) {
+
+                String value =
+                    readStaticField(
+                        f
+                    );
+
+                println(
+                    "[FIELD] " +
+                    f.toGenericString() +
+                    " = " +
+                    value
+                );
+            }
+        }
+    }
+
+    // =========================================================
+    // 内部类
+    // =========================================================
+
+    void scanInnerClasses() {
+
+        println("");
+        println(
+            "----- View.class 内部类 -----"
+        );
+
+        try {
+
+            Class<?>[] classes =
+                View.class.getDeclaredClasses();
+
+            println(
+                "内部类数量 = " +
+                classes.length
+            );
+
+            for (
+                Class<?> c :
+                classes
+            ) {
+
+                String name =
+                    c.getName();
+
+                String lower =
+                    name.toLowerCase(
+                        Locale.US
+                    );
+
+                if (
+                    isInteresting(
+                        lower
+                    )
+                ) {
+
+                    println(
+                        "[INNER CLASS] " +
+                        name
+                    );
+
+                    scanInnerClassDetails(
+                        c
+                    );
+                }
+            }
+
+        } catch (Throwable e) {
+
+            println(
+                "getDeclaredClasses FAIL: " +
+                err(e)
+            );
+        }
+    }
+
+    // =========================================================
+    // 内部类详细信息
+    // =========================================================
+
+    void scanInnerClassDetails(
+        Class<?> c
+    ) {
+
+        try {
+
+            Field[] fields =
+                c.getDeclaredFields();
+
+            for (
+                Field f :
+                fields
+            ) {
+
+                String lower =
+                    f.getName()
+                        .toLowerCase(
+                            Locale.US
+                        );
+
+                if (
+                    isInteresting(
+                        lower
+                    )
+                ) {
+
+                    println(
+                        "  [INNER FIELD] " +
+                        f.toGenericString() +
+                        " = " +
+                        readStaticField(f)
+                    );
+                }
+            }
+
+        } catch (Throwable e) {
+
+            println(
+                "  fields FAIL: " +
+                err(e)
+            );
+        }
+
+        try {
+
+            Method[] methods =
+                c.getDeclaredMethods();
+
+            for (
+                Method m :
+                methods
+            ) {
+
+                String lower =
+                    m.getName()
+                        .toLowerCase(
+                            Locale.US
+                        );
+
+                if (
+                    isInteresting(
+                        lower
+                    )
+                ) {
+
+                    println(
+                        "  [INNER METHOD] " +
+                        m.toGenericString()
+                    );
+                }
+            }
+
+        } catch (Throwable e) {
+
+            println(
+                "  methods FAIL: " +
+                err(e)
+            );
+        }
+    }
+
+    // =========================================================
+    // 特别扫描 Rect / 多 int 参数方法
+    // =========================================================
+
+    void scanEinkCandidates() {
+
+        println("");
+        println(
+            "----- Rect / 坐标 / 更新参数候选 -----"
+        );
+
+        try {
+
+            Method[] methods =
+                View.class.getDeclaredMethods();
+
+            for (
+                Method m :
+                methods
+            ) {
+
+                Class<?>[] p =
+                    m.getParameterTypes();
+
+                boolean hasRect =
+                    false;
+
+                int intCount = 0;
+
+                for (
+                    Class<?> type :
+                    p
+                ) {
+
+                    if (
+                        type ==
+                        Rect.class
+                    ) {
+
+                        hasRect = true;
+                    }
+
+                    if (
+                        type ==
+                        Integer.TYPE
+                    ) {
+
+                        intCount++;
+                    }
+                }
+
+                String name =
+                    m.getName()
+                        .toLowerCase(
+                            Locale.US
+                        );
+
+                boolean nameMatch =
+                    name.contains("eink") ||
+                    name.contains("epd") ||
+                    name.contains("epaper") ||
+                    name.contains("refresh") ||
+                    name.contains("update") ||
+                    name.contains("wave") ||
+                    name.contains("invalidate");
+
+                if (
+                    hasRect ||
+                    (
+                        nameMatch &&
+                        intCount >= 2
+                    )
+                ) {
+
+                    println(
+                        "[RECT CANDIDATE] " +
+                        m.toGenericString()
+                    );
+                }
+            }
+
+        } catch (Throwable e) {
+
+            println(
+                "Rect candidate scan FAIL: " +
+                err(e)
+            );
+        }
+
+        println("");
+        println(
+            "----- 所有 invalidate 相关方法 -----"
+        );
+
+        try {
+
+            Method[] methods =
+                View.class.getDeclaredMethods();
+
+            for (
+                Method m :
+                methods
+            ) {
+
+                if (
+                    m.getName()
+                        .toLowerCase(
+                            Locale.US
+                        )
+                        .contains(
+                            "invalidate"
+                        )
+                ) {
+
+                    println(
+                        "[INVALIDATE] " +
+                        m.toGenericString()
+                    );
+                }
+            }
+
+        } catch (Throwable e) {
+
+            println(
+                "invalidate scan FAIL: " +
+                err(e)
+            );
+        }
+    }
+
+    // =========================================================
+    // E-Ink 名称判断
+    // =========================================================
+
+    boolean isInteresting(
+        String name
+    ) {
+
+        return
+            name.contains("eink") ||
+            name.contains("epd") ||
+            name.contains("epaper") ||
+            name.contains("wave") ||
+            name.contains("waveform") ||
+            name.contains("refresh") ||
+            name.contains("update") ||
+            name.contains("regal") ||
+            name.contains("part") ||
+            name.contains("full") ||
+            name.contains("fast") ||
+            name.contains("gc16") ||
+            name.contains("gl16") ||
+            name.contains("du4") ||
+            name.contains("du") ||
+            name.contains("dither");
+    }
+
+    // =========================================================
+    // 读取静态字段
+    // =========================================================
+
+    String readStaticField(
+        Field f
+    ) {
+
+        try {
+
+            if (
+                !Modifier.isStatic(
+                    f.getModifiers()
+                )
+            ) {
+
+                return "<non-static>";
+            }
+
+            f.setAccessible(
+                true
+            );
+
+            Object value =
+                f.get(null);
+
+            return String.valueOf(
+                value
+            );
+
+        } catch (Throwable e) {
+
+            return
+                "<READ FAIL: " +
+                err(e) +
+                ">";
+        }
+    }
+
+    // =========================================================
+    // 读取当前 E-Ink 模式
+    // =========================================================
+
+    void readModes() {
+
+        println("");
+        println(
+            "----- 当前 E-Ink 模式 -----"
+        );
+
+        try {
+
+            Method m =
+                View.class.getMethod(
+                    "getEinkUpdateMode"
+                );
+
+            Object value =
+                m.invoke(null);
+
+            println(
+                "getEinkUpdateMode = " +
+                String.valueOf(value)
+            );
+
+        } catch (Throwable e) {
+
+            println(
+                "getEinkUpdateMode FAIL: " +
+                err(e)
+            );
+        }
+
+        try {
+
+            Method m =
+                View.class.getMethod(
+                    "getByEinkUpdateMode"
+                );
+
+            Object value =
+                m.invoke(null);
+
+            println(
+                "getByEinkUpdateMode = " +
+                String.valueOf(value)
+            );
+
+        } catch (Throwable e) {
+
+            println(
+                "getByEinkUpdateMode FAIL: " +
+                err(e)
+            );
+        }
+    }
+
+    // =========================================================
+    // setEinkUpdateMode
+    // =========================================================
+
+    void refresh(
+        int mode,
+        String name
+    ) {
+
+        try {
+
+            Method m =
+                View.class.getMethod(
+                    "setEinkUpdateMode",
+                    int.class
+                );
+
+            m.invoke(
+                null,
+                mode
+            );
+
+            println(
+                "setEinkUpdateMode(" +
+                mode +
+                ") = OK"
+            );
+
+            println(
+                "模式名称 = " +
+                name
+            );
+
+            readModes();
+
+            v.flip();
+
+            v.invalidate();
+
+            Toast.makeText(
+                this,
+                name + " 已调用",
+                Toast.LENGTH_SHORT
+            ).show();
+
+        } catch (Throwable e) {
+
+            println(
+                "setEinkUpdateMode FAIL: " +
+                err(e)
+            );
+        }
+    }
+
+    // =========================================================
+    // setByEinkUpdateMode
+    // =========================================================
+
+    void refreshBy(
+        int mode,
+        String name
+    ) {
+
+        try {
+
+            Method m =
+                View.class.getMethod(
+                    "setByEinkUpdateMode",
+                    int.class
+                );
+
+            m.invoke(
+                null,
+                mode
+            );
+
+            println(
+                "setByEinkUpdateMode(" +
+                mode +
+                ") = OK"
+            );
+
+            println(
+                "模式名称 = " +
+                name
+            );
+
+            readModes();
+
+            v.flip();
+
+            v.invalidate();
+
+            Toast.makeText(
+                this,
+                name + " 已调用",
+                Toast.LENGTH_SHORT
+            ).show();
+
+        } catch (Throwable e) {
+
+            println(
+                "setByEinkUpdateMode FAIL: " +
+                err(e)
+            );
+        }
+    }
+
+    // =========================================================
+    // 局部刷新测试
+    // =========================================================
+
+    void local() {
+
+        try {
+
+            Method m =
+                View.class.getMethod(
+                    "setEinkUpdateMode",
+                    int.class
+                );
+
+            m.invoke(
+                null,
+                REGAL
+            );
+
+            println(
+                "setEinkUpdateMode(15) = OK"
+            );
+
+        } catch (Throwable e) {
+
+            println(
+                "Regal set FAIL: " +
+                err(e)
+            );
+        }
+
+        v.flip();
+
+        Rect q =
+            v.rect();
+
+        v.invalidate(q);
+
+        println(
+            "View.invalidate(Rect) = " +
+            q.toShortString()
+        );
+
+        println(
+            "注意：这只是 Android View 层的 Rect invalidate，"
+            +
+            "暂时不能证明 EPD 硬件执行了区域刷新。"
+        );
+    }
+
+    // =========================================================
+    // 系统属性
+    // =========================================================
+
+    String prop(
+        String n
+    ) {
 
         try {
 
@@ -512,304 +1262,184 @@ public class MainActivity extends Activity {
     }
 
     // =========================================================
-    // E-Ink 刷新
+    // 导出日志
     // =========================================================
 
-    void refresh(
-        int mode,
-        String name
-    ) {
-
-        boolean ok = false;
-
-        StringBuilder s =
-            new StringBuilder(
-                name +
-                "=" +
-                mode
-            );
-
-        // -----------------------------------------------------
-        // setEinkUpdateMode
-        // -----------------------------------------------------
+    void exportLog() {
 
         try {
 
-            Method m =
-                View.class.getMethod(
-                    "setEinkUpdateMode",
-                    int.class
+            String text =
+                log.getText().toString();
+
+            if (
+                text.length() == 0
+            ) {
+
+                Toast.makeText(
+                    this,
+                    "当前没有日志",
+                    Toast.LENGTH_SHORT
+                ).show();
+
+                return;
+            }
+
+            Intent intent =
+                new Intent(
+                    Intent.ACTION_CREATE_DOCUMENT
                 );
 
-            m.invoke(
-                v,
-                mode
+            intent.addCategory(
+                Intent.CATEGORY_OPENABLE
             );
 
-            s.append(
-                "\nsetEinkUpdateMode: OK"
+            intent.setType(
+                "text/plain"
             );
 
-            ok = true;
+            String filename =
+                "K103_EInkDeepScan_" +
+                new java.text.SimpleDateFormat(
+                    "yyyyMMdd_HHmmss",
+                    Locale.US
+                ).format(
+                    new java.util.Date()
+                ) +
+                ".txt";
 
-        } catch (
-            NoSuchMethodException e
-        ) {
+            intent.putExtra(
+                Intent.EXTRA_TITLE,
+                filename
+            );
 
-            s.append(
-                "\nsetEinkUpdateMode: 不存在"
+            println(
+                "正在打开系统保存窗口..."
+            );
+
+            startActivityForResult(
+                intent,
+                REQUEST_EXPORT_LOG
             );
 
         } catch (Throwable e) {
 
-            s.append(
-                "\nsetEinkUpdateMode: FAIL "
-            );
-
-            s.append(
+            println(
+                "打开保存窗口失败: " +
                 err(e)
             );
         }
+    }
 
-        // -----------------------------------------------------
-        // setByEinkUpdateMode
-        // -----------------------------------------------------
+    // =========================================================
+    // 保存日志
+    // =========================================================
 
-        if (!ok) {
+    @Override
+    protected void onActivityResult(
+        int requestCode,
+        int resultCode,
+        Intent data
+    ) {
+
+        super.onActivityResult(
+            requestCode,
+            resultCode,
+            data
+        );
+
+        if (
+            requestCode ==
+                REQUEST_EXPORT_LOG &&
+            resultCode ==
+                RESULT_OK &&
+            data != null
+        ) {
+
+            Uri uri =
+                data.getData();
+
+            if (uri == null) {
+
+                println(
+                    "没有选择文件"
+                );
+
+                return;
+            }
 
             try {
 
-                Method m =
-                    View.class.getMethod(
-                        "setByEinkUpdateMode",
-                        int.class
+                java.io.OutputStream out =
+                    getContentResolver()
+                        .openOutputStream(
+                            uri
+                        );
+
+                if (out == null) {
+
+                    throw new Exception(
+                        "无法打开文件"
                     );
+                }
 
-                m.invoke(
-                    v,
-                    mode
+                String text =
+                    log.getText().toString();
+
+                out.write(
+                    text.getBytes(
+                        "UTF-8"
+                    )
                 );
 
-                s.append(
-                    "\nsetByEinkUpdateMode: OK"
+                out.flush();
+                out.close();
+
+                println("");
+                println(
+                    "=============================="
                 );
 
-                ok = true;
-
-            } catch (
-                NoSuchMethodException e
-            ) {
-
-                s.append(
-                    "\nsetByEinkUpdateMode: 不存在"
+                println(
+                    "日志导出成功"
                 );
+
+                println(
+                    "=============================="
+                );
+
+                Toast.makeText(
+                    this,
+                    "日志保存成功",
+                    Toast.LENGTH_LONG
+                ).show();
 
             } catch (Throwable e) {
 
-                s.append(
-                    "\nsetByEinkUpdateMode: FAIL "
-                );
-
-                s.append(
+                println(
+                    "日志保存失败: " +
                     err(e)
                 );
             }
-        }
 
-        v.flip();
-
-        v.invalidate();
-
-        println(
-            s.toString()
-        );
-
-        Toast.makeText(
-            this,
-            ok
-                ? name + " 已调用"
-                : "未找到可用API",
-            Toast.LENGTH_SHORT
-        ).show();
-    }
-
-    // =========================================================
-    // API 探测
-    // =========================================================
-
-    void probe() {
-
-        println("");
-
-        println(
-            "================================"
-        );
-
-        println(
-            "=== E-Ink API Probe ==="
-        );
-
-        println(
-            "================================"
-        );
-
-        String[] names = {
-
-            "setEinkUpdateMode",
-
-            "setByEinkUpdateMode"
-        };
-
-        for (String n : names) {
-
-            try {
-
-                Method m =
-                    View.class.getMethod(
-                        n,
-                        int.class
-                    );
-
-                println(
-                    n +
-                    " FOUND " +
-                    m.toString()
-                );
-
-            } catch (Exception e) {
-
-                println(
-                    n +
-                    " NOT FOUND"
-                );
-            }
-        }
-
-        println("");
-
-        println(
-            "扫描 View.class 中的 E-Ink 相关方法："
-        );
-
-        for (
-            Method m :
-            View.class.getMethods()
+        } else if (
+            requestCode ==
+                REQUEST_EXPORT_LOG
         ) {
 
-            String n =
-                m.getName()
-                    .toLowerCase(
-                        Locale.US
-                    );
-
-            if (
-                n.contains("eink") ||
-                n.contains("epd") ||
-                n.contains("epaper") ||
-                n.contains("wave")
-            ) {
-
-                println(
-                    "FOUND: " +
-                    m.toString()
-                );
-            }
-        }
-
-        println(
-            "=== Probe 完成 ==="
-        );
-    }
-
-    // =========================================================
-    // 局部刷新测试
-    // =========================================================
-
-    void local() {
-
-        try {
-
-            Method m =
-                View.class.getMethod(
-                    "setEinkUpdateMode",
-                    int.class
-                );
-
-            m.invoke(
-                v,
-                REGAL
-            );
-
             println(
-                "setEinkUpdateMode(15) = OK"
-            );
-
-        } catch (Throwable e) {
-
-            println(
-                "Regal set FAIL " +
-                err(e)
+                "日志导出取消"
             );
         }
-
-        v.flip();
-
-        Rect q =
-            v.rect();
-
-        v.invalidate(q);
-
-        println(
-            "invalidate Rect " +
-            q.toShortString()
-        );
-
-        println(
-            "注意：invalidate(Rect) 是 Android View 局部无效区域，"
-            +
-            "不等于已经证明底层 EPD 使用了真正的硬件区域刷新 API。"
-        );
-    }
-
-    // =========================================================
-    // A2 → Regal
-    // =========================================================
-
-    void a2regal() {
-
-        println(
-            "开始 A2 → Regal 测试"
-        );
-
-        refresh(
-            A2,
-            "A2"
-        );
-
-        v.postDelayed(
-            () ->
-                refresh(
-                    REGAL,
-                    "Regal"
-                ),
-            180
-        );
-
-        v.postDelayed(
-            () ->
-                refresh(
-                    REGAL,
-                    "Regal"
-                ),
-            360
-        );
     }
 
     // =========================================================
     // 异常信息
     // =========================================================
 
-    String err(Throwable e) {
+    String err(
+        Throwable e
+    ) {
 
         Throwable t = e;
 
@@ -838,15 +1468,17 @@ public class MainActivity extends Activity {
     }
 
     // =========================================================
-    // E-Ink 测试画布
+    // 测试 View
     // =========================================================
 
-    class TestView extends View {
+    class TestView
+        extends View {
 
         Paint p =
             new Paint();
 
-        boolean inv = false;
+        boolean inv =
+            false;
 
         Rect rr =
             new Rect();
@@ -873,9 +1505,7 @@ public class MainActivity extends Activity {
             int h =
                 getHeight();
 
-            // -------------------------------------------------
             // 白色背景
-            // -------------------------------------------------
 
             p.setStyle(
                 Paint.Style.FILL
@@ -893,9 +1523,7 @@ public class MainActivity extends Activity {
                 p
             );
 
-            // -------------------------------------------------
-            // 黑白棋盘格
-            // -------------------------------------------------
+            // 黑白棋盘
 
             p.setColor(
                 Color.BLACK
@@ -940,9 +1568,7 @@ public class MainActivity extends Activity {
                 }
             }
 
-            // -------------------------------------------------
             // 标题
-            // -------------------------------------------------
 
             p.setTextSize(
                 32
@@ -961,9 +1587,7 @@ public class MainActivity extends Activity {
                 p
             );
 
-            // -------------------------------------------------
             // 状态
-            // -------------------------------------------------
 
             p.setTextSize(
                 20
@@ -978,9 +1602,7 @@ public class MainActivity extends Activity {
                 p
             );
 
-            // -------------------------------------------------
-            // 中央测试区域
-            // -------------------------------------------------
+            // 测试矩形
 
             rr.set(
                 w / 4,
@@ -1011,12 +1633,15 @@ public class MainActivity extends Activity {
 
         void flip() {
 
-            inv = !inv;
+            inv =
+                !inv;
         }
 
         Rect rect() {
 
-            return new Rect(rr);
+            return new Rect(
+                rr
+            );
         }
     }
 }
