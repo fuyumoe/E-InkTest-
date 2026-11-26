@@ -8,7 +8,16 @@ public class MainActivity extends Activity {
   LinearLayout bs=new LinearLayout(this);bs.setOrientation(LinearLayout.VERTICAL); button(bs,"API 探测",x->probe());button(bs,"A2 100",x->refresh(A2,"A2"));button(bs,"Regal 15",x->refresh(REGAL,"Regal"));button(bs,"Part 3",x->refresh(PART,"Part"));button(bs,"Full 1",x->refresh(FULL,"Full"));button(bs,"Fast 18",x->refresh(FAST,"Fast"));button(bs,"局部刷新测试",x->local());button(bs,"A2 → Regal",x->a2regal());r.addView(bs,new LinearLayout.LayoutParams(-1,-2));log=new TextView(this);log.setTextSize(12);r.addView(log,new LinearLayout.LayoutParams(-1,190));setContentView(r);println("设备="+Build.MANUFACTURER+" "+Build.MODEL+" platform="+prop("ro.board.platform")+" SDK="+Build.VERSION.SDK_INT); }
  void button(LinearLayout p,String s,View.OnClickListener l){Button b=new Button(this);b.setText(s);b.setOnClickListener(l);p.addView(b,new LinearLayout.LayoutParams(-1,46));}
  void println(String s){log.setText(log.getText()+"\n"+s);}
- String prop(String n){try{Process p=Runtime.getRuntime().exec(new String[]{"getprop",n});return new java.io.BufferedReader(new java.io.InputStreamReader(p.getInputStream())).readLine();}catch(Exception e){return "?";}}
+ String prop(String n){
+    try{
+        java.lang.Process p=Runtime.getRuntime().exec(new String[]{"getprop",n});
+        return new java.io.BufferedReader(
+            new java.io.InputStreamReader(p.getInputStream())
+        ).readLine();
+    }catch(Exception e){
+        return "?";
+    }
+}
  void refresh(int mode,String name){boolean ok=false;StringBuilder s=new StringBuilder(name+"="+mode);for(String mn:new String[]{"setEinkUpdateMode","setByEinkUpdateMode"})try{Method m=View.class.getMethod(mn,int.class);m.invoke(v,mode);s.append("\n").append(mn).append(": OK");ok=true;break;}catch(NoSuchMethodException e){s.append("\n").append(mn).append(": 不存在");}catch(Throwable e){s.append("\n").append(mn).append(": FAIL ").append(err(e));}v.flip();v.invalidate();println(s.toString());Toast.makeText(this,ok?name+" 已调用":"未找到可用API",Toast.LENGTH_SHORT).show();}
  void probe(){println("=== API Probe ===");for(String n:new String[]{"setEinkUpdateMode","setByEinkUpdateMode"})try{Method m=View.class.getMethod(n,int.class);println(n+" FOUND "+m);}catch(Exception e){println(n+" NOT FOUND");}for(Method m:View.class.getMethods()){String n=m.getName().toLowerCase(Locale.US);if(n.contains("eink")||n.contains("epd")||n.contains("epaper")||n.contains("wave"))println("FOUND: "+m);}}
  void local(){try{Method m=View.class.getMethod("setEinkUpdateMode",int.class);m.invoke(v,REGAL);println("Regal mode set");}catch(Throwable e){println("Regal set FAIL "+err(e));}v.flip();Rect q=v.rect();v.invalidate(q);println("invalidate Rect "+q.toShortString());}
