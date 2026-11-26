@@ -6,6 +6,9 @@ import android.graphics.*;
 import android.view.*;
 import android.widget.*;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
+
 import java.lang.reflect.*;
 import java.util.*;
 
@@ -23,42 +26,69 @@ public class MainActivity extends Activity {
     public void onCreate(Bundle b) {
         super.onCreate(b);
 
-        LinearLayout r = new LinearLayout(this);
-        r.setOrientation(LinearLayout.VERTICAL);
-        r.setPadding(8, 8, 8, 8);
+        LinearLayout root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setPadding(8, 8, 8, 8);
 
-        // 测试画布
+        // E-Ink 测试画布
         v = new TestView(this);
-        r.addView(v, new LinearLayout.LayoutParams(-1, 0, 1));
+        root.addView(
+            v,
+            new LinearLayout.LayoutParams(
+                -1,
+                0,
+                1
+            )
+        );
 
-        // 两列按钮
-        GridLayout bs = new GridLayout(this);
-        bs.setColumnCount(2);
-        bs.setRowCount(4);
+        // 按钮区域
+        GridLayout buttons = new GridLayout(this);
+        buttons.setColumnCount(2);
+        buttons.setRowCount(5);
 
-        addButton(bs, "API 探测", x -> probe());
-        addButton(bs, "A2 100", x -> refresh(A2, "A2"));
-        addButton(bs, "Regal 15", x -> refresh(REGAL, "Regal"));
-        addButton(bs, "Part 3", x -> refresh(PART, "Part"));
-        addButton(bs, "Full 1", x -> refresh(FULL, "Full"));
-        addButton(bs, "Fast 18", x -> refresh(FAST, "Fast"));
-        addButton(bs, "局部刷新", x -> local());
-        addButton(bs, "A2 → Regal", x -> a2regal());
+        addButton(buttons, "API 探测", x -> probe());
+        addButton(buttons, "A2 100", x -> refresh(A2, "A2"));
+        addButton(buttons, "Regal 15", x -> refresh(REGAL, "Regal"));
+        addButton(buttons, "Part 3", x -> refresh(PART, "Part"));
+        addButton(buttons, "Full 1", x -> refresh(FULL, "Full"));
+        addButton(buttons, "Fast 18", x -> refresh(FAST, "Fast"));
+        addButton(buttons, "局部刷新测试", x -> local());
+        addButton(buttons, "A2 → Regal", x -> a2regal());
+        addButton(buttons, "导出日志", x -> exportLog());
+        addButton(buttons, "清空日志", x -> clearLog());
 
-        r.addView(bs, new LinearLayout.LayoutParams(-1, -2));
+        root.addView(
+            buttons,
+            new LinearLayout.LayoutParams(
+                -1,
+                -2
+            )
+        );
 
-        // 日志
+        // 日志区域
         log = new TextView(this);
         log.setTextSize(16);
-        log.setTextColor(Color.BLACK);
-        log.setPadding(6, 6, 6, 6);
+        log.setTextIsSelectable(true);
+        log.setPadding(8, 8, 8, 8);
 
         ScrollView scroll = new ScrollView(this);
-        scroll.addView(log);
+        scroll.addView(
+            log,
+            new ScrollView.LayoutParams(
+                -1,
+                -2
+            )
+        );
 
-        r.addView(scroll, new LinearLayout.LayoutParams(-1, 170));
+        root.addView(
+            scroll,
+            new LinearLayout.LayoutParams(
+                -1,
+                260
+            )
+        );
 
-        setContentView(r);
+        setContentView(root);
 
         println(
             "设备=" + Build.MANUFACTURER +
@@ -66,92 +96,147 @@ public class MainActivity extends Activity {
             " platform=" + prop("ro.board.platform") +
             " SDK=" + Build.VERSION.SDK_INT
         );
-        void exportLog(){
-    try{
-        String text=log.getText().toString();
 
-        java.io.File dir=new java.io.File(
-            android.os.Environment.getExternalStoragePublicDirectory(
-                android.os.Environment.DIRECTORY_DOWNLOADS
-            ).getAbsolutePath()
-        );
-
-        if(!dir.exists()) dir.mkdirs();
-
-        java.io.File file=new java.io.File(dir,"K103_EInkTest_log.txt");
-
-        java.io.FileWriter fw=new java.io.FileWriter(file,false);
-        fw.write(text);
-        fw.close();
-
-        println("日志已导出：");
-        println(file.getAbsolutePath());
-
-        Toast.makeText(
-            this,
-            "日志已保存到 Download/K103_EInkTest_log.txt",
-            Toast.LENGTH_LONG
-        ).show();
-
-    }catch(Exception e){
-        println("导出日志失败："+e);
-        Toast.makeText(
-            this,
-            "导出失败："+e.getMessage(),
-            Toast.LENGTH_LONG
-        ).show();
-    }
-}
+        println("=== K103 E-Ink Test ===");
+        println("按钮：API探测 / A2 / Regal / Part / Full / Fast");
+        println("支持：局部刷新 / A2→Regal / 导出日志");
     }
 
-    // 添加大按钮
+    // =========================================================
+    // 按钮
+    // =========================================================
+
     void addButton(GridLayout parent, String text, View.OnClickListener listener) {
 
         Button b = new Button(this);
 
         b.setText(text);
-
-        // 墨水屏上字体明显放大
-        b.setTextSize(20);
-
-        // 防止文字上下被裁剪
-        b.setGravity(Gravity.CENTER);
-
-        b.setSingleLine(true);
-
-        b.setPadding(4, 4, 4, 4);
-
+        b.setTextSize(18);
+        b.setAllCaps(false);
         b.setOnClickListener(listener);
 
         GridLayout.LayoutParams lp = new GridLayout.LayoutParams();
 
         lp.width = 0;
-        lp.height = 70;
+        lp.height = 68;
 
         lp.columnSpec = GridLayout.spec(
             GridLayout.UNDEFINED,
             1f
         );
 
-        lp.setMargins(3, 3, 3, 3);
+        lp.setMargins(4, 4, 4, 4);
 
         parent.addView(b, lp);
     }
 
+    // =========================================================
+    // 日志
+    // =========================================================
+
     void println(String s) {
 
-        if (log == null) return;
+        if (log == null) {
+            return;
+        }
 
-        log.append("\n" + s);
+        log.append(s);
+        log.append("\n");
 
         log.post(() -> {
-            ViewParent p = log.getParent();
 
-            if (p instanceof ScrollView) {
-                ((ScrollView)p).fullScroll(View.FOCUS_DOWN);
+            if (log.getParent() instanceof ScrollView) {
+
+                ScrollView sv = (ScrollView) log.getParent();
+
+                sv.post(() -> sv.fullScroll(View.FOCUS_DOWN));
             }
         });
     }
+
+    void clearLog() {
+
+        if (log != null) {
+            log.setText("");
+        }
+
+        println("日志已清空");
+    }
+
+    // =========================================================
+    // 导出日志
+    // =========================================================
+
+    void exportLog() {
+
+        try {
+
+            String text = log.getText().toString();
+
+            if (text.length() == 0) {
+                Toast.makeText(
+                    this,
+                    "当前没有日志",
+                    Toast.LENGTH_SHORT
+                ).show();
+
+                return;
+            }
+
+            java.io.File dir =
+                Environment.getExternalStoragePublicDirectory(
+                    Environment.DIRECTORY_DOWNLOADS
+                );
+
+            if (!dir.exists()) {
+                dir.mkdirs();
+            }
+
+            String filename =
+                "K103_EInkTest_log_" +
+                new java.text.SimpleDateFormat(
+                    "yyyyMMdd_HHmmss",
+                    Locale.US
+                ).format(new java.util.Date()) +
+                ".txt";
+
+            java.io.File file =
+                new java.io.File(dir, filename);
+
+            java.io.FileWriter writer =
+                new java.io.FileWriter(file, false);
+
+            writer.write(text);
+            writer.flush();
+            writer.close();
+
+            println("");
+            println("================================");
+            println("日志导出成功");
+            println("文件：" + file.getAbsolutePath());
+            println("================================");
+
+            Toast.makeText(
+                this,
+                "日志已导出到 Download",
+                Toast.LENGTH_LONG
+            ).show();
+
+        } catch (Throwable e) {
+
+            println("日志导出失败：" + err(e));
+
+            Toast.makeText(
+                this,
+                "导出失败：" + e.getMessage(),
+                Toast.LENGTH_LONG
+            ).show();
+        }
+    }
+
+    // =========================================================
+    // 系统属性
+    // =========================================================
 
     String prop(String n) {
 
@@ -162,11 +247,18 @@ public class MainActivity extends Activity {
                     new String[]{"getprop", n}
                 );
 
-            return new java.io.BufferedReader(
-                new java.io.InputStreamReader(
-                    p.getInputStream()
-                )
-            ).readLine();
+            java.io.BufferedReader r =
+                new java.io.BufferedReader(
+                    new java.io.InputStreamReader(
+                        p.getInputStream()
+                    )
+                );
+
+            String s = r.readLine();
+
+            r.close();
+
+            return s == null ? "?" : s;
 
         } catch (Exception e) {
 
@@ -174,49 +266,81 @@ public class MainActivity extends Activity {
         }
     }
 
+    // =========================================================
+    // E-Ink 刷新模式
+    // =========================================================
+
     void refresh(int mode, String name) {
 
         boolean ok = false;
 
         StringBuilder s =
-            new StringBuilder(name + " = " + mode);
+            new StringBuilder(
+                name + "=" + mode
+            );
 
-        for (String mn :
-            new String[]{
-                "setEinkUpdateMode",
-                "setByEinkUpdateMode"
-            }) {
+        // 第一种可能的 RK3368 API
+        try {
+
+            Method m =
+                View.class.getMethod(
+                    "setEinkUpdateMode",
+                    int.class
+                );
+
+            m.invoke(v, mode);
+
+            s.append("\nsetEinkUpdateMode: OK");
+
+            ok = true;
+
+        } catch (NoSuchMethodException e) {
+
+            s.append(
+                "\nsetEinkUpdateMode: 不存在"
+            );
+
+        } catch (Throwable e) {
+
+            s.append(
+                "\nsetEinkUpdateMode: FAIL "
+            );
+
+            s.append(err(e));
+        }
+
+        // 第二种可能的 API
+        if (!ok) {
 
             try {
 
                 Method m =
                     View.class.getMethod(
-                        mn,
+                        "setByEinkUpdateMode",
                         int.class
                     );
 
                 m.invoke(v, mode);
 
-                s.append("\n")
-                    .append(mn)
-                    .append(": OK");
+                s.append(
+                    "\nsetByEinkUpdateMode: OK"
+                );
 
                 ok = true;
 
-                break;
-
             } catch (NoSuchMethodException e) {
 
-                s.append("\n")
-                    .append(mn)
-                    .append(": 不存在");
+                s.append(
+                    "\nsetByEinkUpdateMode: 不存在"
+                );
 
             } catch (Throwable e) {
 
-                s.append("\n")
-                    .append(mn)
-                    .append(": FAIL ")
-                    .append(err(e));
+                s.append(
+                    "\nsetByEinkUpdateMode: FAIL "
+                );
+
+                s.append(err(e));
             }
         }
 
@@ -227,22 +351,30 @@ public class MainActivity extends Activity {
 
         Toast.makeText(
             this,
-            ok ? name + " 已调用" : "未找到可用API",
+            ok
+                ? name + " 已调用"
+                : "未找到可用API",
             Toast.LENGTH_SHORT
         ).show();
     }
 
+    // =========================================================
+    // API 探测
+    // =========================================================
+
     void probe() {
 
-        println("=== API Probe ===");
+        println("");
+        println("================================");
+        println("=== E-Ink API Probe ===");
+        println("================================");
 
-        for (
-            String n :
-            new String[]{
-                "setEinkUpdateMode",
-                "setByEinkUpdateMode"
-            }
-        ) {
+        String[] names = {
+            "setEinkUpdateMode",
+            "setByEinkUpdateMode"
+        };
+
+        for (String n : names) {
 
             try {
 
@@ -253,19 +385,24 @@ public class MainActivity extends Activity {
                     );
 
                 println(
-                    n + " FOUND " + m
+                    n +
+                    " FOUND " +
+                    m.toString()
                 );
 
             } catch (Exception e) {
 
                 println(
-                    n + " NOT FOUND"
+                    n +
+                    " NOT FOUND"
                 );
             }
         }
 
-        for (Method m :
-            View.class.getMethods()) {
+        println("");
+        println("扫描 View.class 中的 E-Ink 相关方法：");
+
+        for (Method m : View.class.getMethods()) {
 
             String n =
                 m.getName().toLowerCase(
@@ -280,11 +417,18 @@ public class MainActivity extends Activity {
             ) {
 
                 println(
-                    "FOUND: " + m
+                    "FOUND: " +
+                    m.toString()
                 );
             }
         }
+
+        println("=== Probe 完成 ===");
     }
+
+    // =========================================================
+    // 局部刷新
+    // =========================================================
 
     void local() {
 
@@ -299,7 +443,7 @@ public class MainActivity extends Activity {
             m.invoke(v, REGAL);
 
             println(
-                "Regal mode set"
+                "setEinkUpdateMode(15) = OK"
             );
 
         } catch (Throwable e) {
@@ -320,9 +464,20 @@ public class MainActivity extends Activity {
             "invalidate Rect " +
             q.toShortString()
         );
+
+        println(
+            "注意：这里是 Android View 的 Rect invalidate，"
+            + "不等于已经证明底层 EPD 使用了真正的区域刷新 API。"
+        );
     }
 
+    // =========================================================
+    // A2 → Regal
+    // =========================================================
+
     void a2regal() {
+
+        println("开始 A2 → Regal 测试");
 
         refresh(A2, "A2");
 
@@ -337,13 +492,23 @@ public class MainActivity extends Activity {
         );
     }
 
+    // =========================================================
+    // 异常信息
+    // =========================================================
+
     String err(Throwable e) {
 
-        Throwable t =
+        Throwable t = e;
+
+        if (
             e instanceof InvocationTargetException &&
             ((InvocationTargetException)e).getCause() != null
-                ? ((InvocationTargetException)e).getCause()
-                : e;
+        ) {
+
+            t =
+                ((InvocationTargetException)e)
+                    .getCause();
+        }
 
         return
             t.getClass().getSimpleName() +
@@ -352,6 +517,10 @@ public class MainActivity extends Activity {
                 t.getMessage()
             );
     }
+
+    // =========================================================
+    // 测试画布
+    // =========================================================
 
     class TestView extends View {
 
@@ -370,11 +539,13 @@ public class MainActivity extends Activity {
             );
         }
 
+        @Override
         protected void onDraw(Canvas c) {
 
             int w = getWidth();
             int h = getHeight();
 
+            // 白色背景
             p.setStyle(
                 Paint.Style.FILL
             );
@@ -391,7 +562,7 @@ public class MainActivity extends Activity {
                 p
             );
 
-            // 棋盘格
+            // 黑白棋盘格
             p.setColor(
                 Color.BLACK
             );
@@ -416,7 +587,7 @@ public class MainActivity extends Activity {
 
                     if (
                         ((x / z) +
-                        (y / z)) % 2 == 0
+                         (y / z)) % 2 == 0
                     ) {
 
                         c.drawRect(
@@ -447,18 +618,18 @@ public class MainActivity extends Activity {
             );
 
             // 状态
-            p.setTextSize(24);
+            p.setTextSize(20);
 
             c.drawText(
                 inv
                     ? "State B"
                     : "State A",
                 24,
-                88,
+                82,
                 p
             );
 
-            // 测试区域
+            // 中央测试区域
             rr.set(
                 w / 4,
                 h / 3,
