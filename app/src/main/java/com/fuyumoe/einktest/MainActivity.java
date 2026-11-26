@@ -1,4 +1,3 @@
-java
 package com.fuyumoe.einktest;
 
 import android.app.Activity;
