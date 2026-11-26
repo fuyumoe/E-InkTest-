@@ -37,11 +37,11 @@ jobs:
           sdkmanager "platforms;android-35"
           sdkmanager "build-tools;35.0.0"
 
-      - name: Make gradlew executable
-        run: chmod +x gradlew
-
-      - name: Check Gradle
-        run: ./gradlew --version
+      - name: Prepare Gradle
+        run: |
+          mkdir -p "$HOME/.gradle"
+          chmod 755 "$HOME/.gradle"
+          chmod +x gradlew
 
       - name: Build Debug APK
         run: ./gradlew assembleDebug --stacktrace
