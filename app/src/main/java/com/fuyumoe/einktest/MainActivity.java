@@ -66,6 +66,42 @@ public class MainActivity extends Activity {
             " platform=" + prop("ro.board.platform") +
             " SDK=" + Build.VERSION.SDK_INT
         );
+        void exportLog(){
+    try{
+        String text=log.getText().toString();
+
+        java.io.File dir=new java.io.File(
+            android.os.Environment.getExternalStoragePublicDirectory(
+                android.os.Environment.DIRECTORY_DOWNLOADS
+            ).getAbsolutePath()
+        );
+
+        if(!dir.exists()) dir.mkdirs();
+
+        java.io.File file=new java.io.File(dir,"K103_EInkTest_log.txt");
+
+        java.io.FileWriter fw=new java.io.FileWriter(file,false);
+        fw.write(text);
+        fw.close();
+
+        println("日志已导出：");
+        println(file.getAbsolutePath());
+
+        Toast.makeText(
+            this,
+            "日志已保存到 Download/K103_EInkTest_log.txt",
+            Toast.LENGTH_LONG
+        ).show();
+
+    }catch(Exception e){
+        println("导出日志失败："+e);
+        Toast.makeText(
+            this,
+            "导出失败："+e.getMessage(),
+            Toast.LENGTH_LONG
+        ).show();
+    }
+}
     }
 
     // 添加大按钮
